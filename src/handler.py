@@ -5,12 +5,63 @@ import runpod
 import requests
 from requests.adapters import HTTPAdapter, Retry
 
+import torch
+from diffusers import PixArtAlphaPipeline
+
+
 LOCAL_URL = "http://127.0.0.1:5000"
+
+INPUT_SCHEMA = {
+    "seed": {
+        "type": int,
+        "title": "Seed",
+        "required": False,
+        "description": "Random seed. Leave blank to randomize the seed"
+    },
+    "prompt": {
+        "type": str,
+        "title": "Prompt",
+        "default": "With the style of van gogh, A young couple dances under the moonlight by the lake.",
+        "required": True,
+        "description": "Prompt for video generation."
+    },
+    "save_fps": {
+        "type": int,
+        "title": "Save Fps",
+        "default": 10,
+        "required": False,
+        "description": "Frame per second for the generated video."
+    },
+    "ddim_steps": {
+        "type": int,
+        "title": "Ddim Steps",
+        "default": 50,
+        "required": False,
+        "description": "Number of denoising steps."
+    },
+    "unconditional_guidance_scale": {
+        "type": float,
+        "title": "Unconditional Guidance Scale",
+        "default": 12,
+        "required": False,
+        "description": "Classifier-free guidance scale."
+    }
+}
+
+
+def run_pixart():
+    pipe = PixArtAlphaPipeline.from_pretrained("PixArt-alpha/PixArt-XL-2-1024-MS", torch_dtype=torch.float16)
+    pipe = pipe.to('cuda')
+
+    prompt = "A alpaca made of colorful building blocks, cyberpunk"
+    result = pipe(prompt)
+    print(result)
+    return result.images[0] # .save("image.png")
+
 
 cog_session = requests.Session()
 retries = Retry(total=10, backoff_factor=0.1, status_forcelist=[502, 503, 504])
 cog_session.mount('http://', HTTPAdapter(max_retries=retries))
-
 
 # ----------------------------- Start API Service ---------------------------- #
 # Call "python -m cog.server.http" in a subprocess to start the API service.
@@ -60,7 +111,9 @@ def handler(event):
 
     json = run_inference({"input": event["input"]})
 
-    return json["output"]
+    op = run_pixart()
+
+    return op
 
 
 if __name__ == "__main__":
