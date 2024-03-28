@@ -2,3 +2,4 @@ diffusers
 transformers
 sentencepiece
 accelerate
+runpod
