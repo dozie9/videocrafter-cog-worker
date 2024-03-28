@@ -15,4 +15,4 @@ RUN python -m pip install -r requirements.txt
 
 ADD src/handler.py /rp_handler.py
 
-CMD ["/opt/venv/bin/python3", "-u", "/rp_handler.py"]
+CMD ["python", "-u", "/rp_handler.py"]
