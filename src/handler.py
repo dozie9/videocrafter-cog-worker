@@ -109,7 +109,7 @@ def handler(event):
     This is the handler function that will be called by the serverless.
     '''
 
-    json = run_inference({"input": event["input"]})
+    # json = run_inference({"input": event["input"]})
 
     op = run_pixart()
 
