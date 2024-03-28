@@ -1,8 +1,5 @@
-ARG COG_REPO
-ARG COG_MODEL
-ARG COG_VERSION
-
-FROM r8.im/${COG_REPO}/${COG_MODEL}@sha256:${COG_VERSION}
+ARG BASE_IMAGE=runpod/pytorch:3.10-2.0.0-117
+FROM ${BASE_IMAGE} as dependencies
 
 # Install necessary packages and Python 3.10
 RUN apt-get update && apt-get upgrade -y && \
