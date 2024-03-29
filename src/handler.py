@@ -1,13 +1,19 @@
 import time
 import subprocess
+import mimetypes
+import uuid
 
 import runpod
 import requests
 from requests.adapters import HTTPAdapter, Retry
+from firebase_admin import credentials, initialize_app, storage, firestore
 
 import torch
 from diffusers import PixArtAlphaPipeline
+from runpod.serverless.modules.rp_logger import RunPodLogger
 
+
+logger = RunPodLogger()
 
 LOCAL_URL = "http://127.0.0.1:5000"
 
@@ -49,13 +55,33 @@ INPUT_SCHEMA = {
 }
 
 
+def get_extension_from_mime(mime_type):
+    extension = mimetypes.guess_extension(mime_type)
+    return extension
+
+def upload_pix(pil_obj, filename):
+    destination_blob_name = f'pixart/{filename}'
+    bucket = storage.bucket()
+    blob = bucket.blob(destination_blob_name)
+
+    pil_obj.save(filename)
+    blob.upload_from_filename(filename)
+
+    # Opt : if you want to make public access from the URL
+    blob.make_public()
+
+    logger.info("File uploaded to firebase...")
+    return blob.public_url
+
+
+
 def run_pixart():
     pipe = PixArtAlphaPipeline.from_pretrained("PixArt-alpha/PixArt-XL-2-1024-MS", torch_dtype=torch.float16)
     pipe = pipe.to('cuda')
 
     prompt = "A alpaca made of colorful building blocks, cyberpunk"
     result = pipe(prompt)
-    print(result)
+    # print(result)
     return result.images[0] # .save("image.png")
 
 
@@ -112,8 +138,9 @@ def handler(event):
     # json = run_inference({"input": event["input"]})
 
     op = run_pixart()
+    url = upload_pix(op, f'{uuid.uuid4()}.png')
 
-    return op
+    return url
 
 
 if __name__ == "__main__":
