@@ -1,3 +1,5 @@
+import json
+import os
 import time
 import subprocess
 import mimetypes
@@ -16,6 +18,17 @@ from runpod.serverless.modules.rp_logger import RunPodLogger
 logger = RunPodLogger()
 
 LOCAL_URL = "http://127.0.0.1:5000"
+
+SERVICE_CERT = json.loads(os.environ["FIREBASE_KEY"])
+# SADTALKER_SERVICE_CERT = json.loads(os.environ["SADTALKER_FIREBASE_KEY"])
+STORAGE_BUCKET = os.environ["STORAGE_BUCKET"]
+
+cred_obj = credentials.Certificate(SERVICE_CERT)
+# sad_cred_obj = credentials.Certificate(SADTALKER_SERVICE_CERT)
+
+default_app = initialize_app(cred_obj, {"storageBucket": STORAGE_BUCKET}, name='videocrafter')
+# sad_app = initialize_app(sad_cred_obj, name='sadtalker')
+
 
 INPUT_SCHEMA = {
     "seed": {
@@ -61,7 +74,7 @@ def get_extension_from_mime(mime_type):
 
 def upload_pix(pil_obj, filename):
     destination_blob_name = f'pixart/{filename}'
-    bucket = storage.bucket()
+    bucket = storage.bucket(app=default_app)
     blob = bucket.blob(destination_blob_name)
 
     pil_obj.save(filename)
