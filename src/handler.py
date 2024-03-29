@@ -59,13 +59,13 @@ def run_pixart():
     return result.images[0] # .save("image.png")
 
 
-cog_session = requests.Session()
-retries = Retry(total=10, backoff_factor=0.1, status_forcelist=[502, 503, 504])
-cog_session.mount('http://', HTTPAdapter(max_retries=retries))
+# cog_session = requests.Session()
+# retries = Retry(total=10, backoff_factor=0.1, status_forcelist=[502, 503, 504])
+# cog_session.mount('http://', HTTPAdapter(max_retries=retries))
 
 # ----------------------------- Start API Service ---------------------------- #
 # Call "python -m cog.server.http" in a subprocess to start the API service.
-subprocess.Popen(["python", "-m", "cog.server.http"])
+# subprocess.Popen(["python", "-m", "cog.server.http"])
 
 
 # ---------------------------------------------------------------------------- #
@@ -92,13 +92,13 @@ def wait_for_service(url):
         time.sleep(0.2)
 
 
-def run_inference(inference_request):
-    '''
-    Run inference on a request.
-    '''
-    response = cog_session.post(url=f'{LOCAL_URL}/predictions',
-                                json=inference_request, timeout=600)
-    return response.json()
+# def run_inference(inference_request):
+#     '''
+#     Run inference on a request.
+#     '''
+#     response = cog_session.post(url=f'{LOCAL_URL}/predictions',
+#                                 json=inference_request, timeout=600)
+#     return response.json()
 
 
 # ---------------------------------------------------------------------------- #
@@ -117,7 +117,7 @@ def handler(event):
 
 
 if __name__ == "__main__":
-    wait_for_service(url=f'{LOCAL_URL}/health-check')
+    # wait_for_service(url=f'{LOCAL_URL}/health-check')
 
     print("Cog API Service is ready. Starting RunPod serverless handler...")
 
